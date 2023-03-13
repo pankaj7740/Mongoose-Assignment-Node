@@ -3,21 +3,21 @@ import express from 'express';
 import { appLoader } from './src/loaders/app';
 import { databaseLoader } from './src/loaders/database';
 import { router } from './src/routers';
-import { Schema, model, connect } from 'mongoose';
 
 
 
 
 
-// process.on('uncaughtException', err => {
-//   console.log(' UNCAUGHT EXCEPTION ');
-//   console.log('[Inside \'uncaughtException\' event] ' + err.stack || err.message);
-// });
-// process.on('unhandledRejection',
-//   (reason, promise) => {
-//     console.log(' UNHANDLED REJECTION ');
-//     console.log('Unhandled Rejection at: ', promise, 'REASON: ', reason);
-//   });
+
+process.on('uncaughtException', err => {
+  console.log(' UNCAUGHT EXCEPTION ');
+  console.log('[Inside \'uncaughtException\' event] ' + err.stack || err.message);
+});
+process.on('unhandledRejection',
+  (reason, promise) => {
+    console.log(' UNHANDLED REJECTION ');
+    console.log('Unhandled Rejection at: ', promise, 'REASON: ', reason);
+  });
 
 const app = express();
 
@@ -27,17 +27,14 @@ databaseLoader()
     console.log(error);
     process.exit(1);
   });
-// databaseLoader()
-// .then()
-// .catch()
 
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user?: any;
-//     }
-//   }
-// }
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any;
+    }
+  }
+}
 
 
 

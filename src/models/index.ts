@@ -1,7 +1,7 @@
 import { model, Schema, Document } from "mongoose";
 
 export interface IProduct extends Document {
-  pid: string,
+  pid: number,
   title: string,
   price: number,
   category: string,
@@ -13,9 +13,8 @@ export interface IProduct extends Document {
 
 const productSchema:Schema = new Schema<IProduct>({
   pid: {
-    type: String,
+    type: Number,
     required:true,
-    unique:true
   },
   title: { 
     type: String,

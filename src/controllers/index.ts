@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import { IProduct, Product } from "../models";
+import { validateProductBody, validateProductId } from "../middlewares";
 import {
   createProduct,
   getAllProducts,
@@ -14,7 +15,7 @@ export const routers = express();
 
 routers.use(express.json());
 
-routers.post("/", async (req: Request, res: Response) => {
+routers.post("/",validateProductBody, async (req: Request, res: Response) => {
   try {
     const productBody = req.body;
     const product: IProduct = new Product({
@@ -50,7 +51,7 @@ routers.get("/", async (req: Request, res: Response) => {
   }
 });
 
-routers.get("/:id", async (req: Request, res: Response) => {
+routers.get("/:id",validateProductId, async (req: Request, res: Response) => {
   try {
     if (ObjectId.isValid(req.params.id)) {
       const productId = req.params.id;
@@ -73,7 +74,7 @@ routers.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-routers.put("/:id", async (req: Request, res: Response) => {
+routers.put("/:id", validateProductBody, async (req: Request, res: Response) => {
   try {
     if (ObjectId.isValid(req.params.id)) {
       const productId = req.params.id;
