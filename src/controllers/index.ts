@@ -51,7 +51,7 @@ routers.get("/", async (req: Request, res: Response) => {
   }
 });
 
-routers.get("/:id",validateProductId, async (req: Request, res: Response) => {
+routers.get("/:id", async (req: Request, res: Response) => {
   try {
     if (ObjectId.isValid(req.params.id)) {
       const productId = req.params.id;
