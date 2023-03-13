@@ -31,7 +31,7 @@ routers.post("/",validateProductBody, async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).send({
       status: false,
-      message: "couldn't Be created",
+      message: "Product couldn't Be created",
     });
   }
 });
@@ -69,7 +69,7 @@ routers.get("/:id", async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).send({
       status: false,
-      message: "couldn't find",
+      message: "couldn't find product using Id",
     });
   }
 });
@@ -93,7 +93,7 @@ routers.put("/:id", validateProductBody, async (req: Request, res: Response) => 
   } catch (error: any) {
     res.status(400).send({
       status: false,
-      message: "couldn't find",
+      message: "Couldn't be updated",
     });
   }
 });
@@ -115,7 +115,7 @@ routers.delete("/:id", async (req: Request, res: Response) => {
   } catch (error:any) {
     res.status(400).send({
       status: false,
-      message: "couldn't find",
+      message: "Product doesn't removed successfully",
     });
   }
 });
