@@ -1,6 +1,11 @@
 import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 import { IProduct,Product } from "../models";
+import Jwt  from "jsonwebtoken";
+
+const secretKey = "secretKey";
+const NAMESPACE = "Auth";
+
 
 
 const validateProductBody = (req:Request,res:Response,next:NextFunction)=>{
@@ -26,4 +31,25 @@ const validateProductId = (req:Request,res:Response,next:NextFunction)=>{
    }
    next();
 }
-export  {validateProductBody,validateProductId}
+const verifyToken = (req:Request,res:Response,next:NextFunction)=>{
+    const token = req.headers['authorization'];
+    console.log(token);
+    
+    if(!token){
+        return res.status(401).send("Token is not valid");
+    }else{
+        try{
+            const decoded = Jwt.verify(token,secretKey);
+            // console.log(decoded);
+        //     // req.user = decoded;
+        //    const tse= res.locals.Jwt = decoded;
+        //    tse;
+        //    console.log(tse);
+            next();
+        }catch(err){
+            res.status(401).send("Unauthorized");
+        }
+    }
+}
+
+export  {validateProductBody,validateProductId,verifyToken}

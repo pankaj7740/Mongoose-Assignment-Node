@@ -36,9 +36,20 @@ const productSchema: Schema = new Schema<IProduct>({
     type: String,
   },
 });
-
 export const Product = model<IProduct>("Product", productSchema);
-// export default model<ProductModel>("Product",productSchema)
+
+export interface IUser extends Document{
+  username: string;
+  passcode: string;
+}
+
+const userSchema: Schema = new Schema<IUser>({
+  username: {type:String,required:true,unique:true,lowercase:true},
+  passcode: {type:String,required:true,},
+})
+
+export const User = model<IUser>("User",userSchema);
+
 
 export interface IProductHead extends Document {
   name: string;
