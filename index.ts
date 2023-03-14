@@ -4,11 +4,6 @@ import { appLoader } from './src/loaders/app';
 import { databaseLoader } from './src/loaders/database';
 import { router } from './src/routers';
 
-
-
-
-
-
 process.on('uncaughtException', err => {
   console.log(' UNCAUGHT EXCEPTION ');
   console.log('[Inside \'uncaughtException\' event] ' + err.stack || err.message);

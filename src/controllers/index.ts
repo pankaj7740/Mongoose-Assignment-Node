@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
-import { IProduct, Product } from "../models";
+import { IProduct, Product,IFarm,IProductHead,ProdctHead,Farm } from "../models";
 import { validateProductBody, validateProductId } from "../middlewares";
 import {
   createProduct,
@@ -9,6 +9,7 @@ import {
   getProductById,
   updateProductById,
   deleteProductById,
+  createProduct1,
 } from "../services";
 
 export const routers = express();
@@ -115,7 +116,49 @@ routers.delete("/:id", async (req: Request, res: Response) => {
   } catch (error:any) {
     res.status(400).send({
       status: false,
-      message: "Product doesn't removed successfully",
+      message: "Product removed Faild",
     });
   }
 });
+
+
+routers.post("/",async (req:Request, res:Response)=>{
+  try{
+   const productBody = req.body
+   const product : IProductHead = new ProdctHead({
+     _id: new mongoose.Types.ObjectId(),
+    ...productBody,
+   });
+   const createdProduct = await createProduct1(product);
+   res.status(200).send( createdProduct);
+  }catch(err){
+    res.status(400).send({
+      status: false,
+      message: "Product body is not valid",
+    });
+  }
+
+})
+
+routers.post("/",async (req, res) => {
+  try{
+    const farmBody = req.body;
+    const farm :IFarm = new Farm({
+      _id :new mongoose.Types.ObjectId(),
+      ...farmBody
+    });
+    res.status(200).send({
+      status: true,
+      message: "Ok",
+      data: farm,
+    });
+  }catch(err) {
+    res.status(400).send({
+      status: false,
+      message: "Farm body is not valid",
+    });
+  }
+})
+routers.get("/:id",async(req:Request,res:Response)=>{
+    const id = req.params.id;
+})

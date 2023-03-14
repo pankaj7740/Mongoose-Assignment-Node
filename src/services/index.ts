@@ -38,3 +38,18 @@ export const deleteProductById = (productId: string) => {
     .catch(reject);
   });
 };
+
+export const createProduct1 = (productBody: any)=>{
+    return new Promise ((resolve, reject) => {
+        productBody.save()
+        .then(resolve)
+        .catch(reject);
+    });
+}
+export const getProductId = (productId:string)=>{
+    return new Promise ((resolve, reject) => {
+        Product.findById(productId)
+       .then(resolve)
+       .catch(reject);
+    });
+}

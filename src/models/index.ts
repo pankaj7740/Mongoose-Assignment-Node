@@ -1,42 +1,73 @@
-import { model, Schema, Document } from "mongoose";
+import { model, Schema, Document, Types } from "mongoose";
 
 export interface IProduct extends Document {
-  pid: number,
-  title: string,
-  price: number,
-  category: string,
-  description: string,
-  image: string,
+  pid: number;
+  title: string;
+  price: number;
+  category: string;
+  description: string;
+  image: string;
 }
 
 // export interface ProductModel extends IProduct, Document{}
 
-const productSchema:Schema = new Schema<IProduct>({
+const productSchema: Schema = new Schema<IProduct>({
   pid: {
     type: Number,
-    required:true,
+    required: true,
   },
-  title: { 
+  title: {
     type: String,
-    required:true
+    required: true,
   },
-  price: { 
+  price: {
     type: Number,
-    required:true  
+    required: true,
   },
-  category: { 
-    type: String ,
-    required:true
-  },
-  description: { 
+  category: {
     type: String,
-    required:true
+    required: true,
   },
-  image: { 
-    type: String 
-  }
+  description: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+  },
 });
 
-export const Product = model<IProduct>("Product",productSchema);
+export const Product = model<IProduct>("Product", productSchema);
 // export default model<ProductModel>("Product",productSchema)
 
+export interface IProductHead extends Document {
+  name: string;
+  age: number;
+  location: string;
+}
+const productHeadSchema: Schema = new Schema<IProductHead>({
+  name: { type: String },
+  age: { type: Number },
+  location: { type: String },
+});
+export const ProdctHead = model<IProductHead>("Head", productHeadSchema);
+
+export interface IFarm extends Document {
+  name: string;
+  price: number;
+  category: string;
+  heads?: Types.ObjectId;
+}
+const farmSchema: Schema = new Schema<IFarm>({
+  name: { type: String },
+  price: { type: Number },
+  category: { type: String },
+  heads: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Head",
+    },
+  ],
+});
+
+export const Farm = model<IFarm>("Farm", farmSchema);
