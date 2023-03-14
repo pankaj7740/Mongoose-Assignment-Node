@@ -26,7 +26,6 @@ export const routers = express();
 
 routers.use(express.json());
 
-const secretkey = "secretKey";
 
 routers.post("/auth",async (req: Request, res: Response) => {
   try {
@@ -36,7 +35,7 @@ routers.post("/auth",async (req: Request, res: Response) => {
       ...userBody,
     });
     await createUser(user);
-    jwt.sign({ user }, secretkey, {expiresIn:'200s'}, (err, token) => {
+    jwt.sign({ user }, String(process.env.SECRET_KEY), {expiresIn:'200s'}, (err, token) => {
       if (err) throw err;
       res.status(201).send(token);
     });

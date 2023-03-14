@@ -3,10 +3,6 @@ import { Request, Response, NextFunction } from "express";
 import { IProduct,Product } from "../models";
 import Jwt  from "jsonwebtoken";
 
-const secretKey = "secretKey";
-const NAMESPACE = "Auth";
-
-
 
 const validateProductBody = (req:Request,res:Response,next:NextFunction)=>{
     const {error} = Joi.object<IProduct>({
@@ -39,7 +35,7 @@ const verifyToken = (req:Request,res:Response,next:NextFunction)=>{
         return res.status(401).send("Token is not valid");
     }else{
         try{
-            const decoded = Jwt.verify(token,secretKey);
+            const decoded = Jwt.verify(token,String(process.env.SECRET_KEY));
             // console.log(decoded);
         //     // req.user = decoded;
         //    const tse= res.locals.Jwt = decoded;
@@ -47,7 +43,7 @@ const verifyToken = (req:Request,res:Response,next:NextFunction)=>{
         //    console.log(tse);
             next();
         }catch(err){
-            res.status(401).send("Unauthorized");
+            res.status(401).send("Unauthorised access");
         }
     }
 }
