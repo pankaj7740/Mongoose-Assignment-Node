@@ -7,11 +7,18 @@ import {
   Product,
   IUser,
   User,
+  Farm,
+  IFarm,
+  IProductHead,
+  Head,
+  IFileUpload,
+  File
 } from "../models";
 import {
   validateProductBody,
   validateProductId,
   verifyToken,
+  upload
 } from "../middlewares";
 import {
   createProduct,
@@ -19,7 +26,11 @@ import {
   getProductById,
   updateProductById,
   deleteProductById,
-  createUser
+  createUser,
+  createProductHead,
+  createfarm,
+  getProductHeadById,
+  UploadFile
 } from "../services";
 
 export const routers = express();
@@ -157,43 +168,117 @@ routers.delete("/:id",verifyToken, async (req: Request, res: Response) => {
     });
   }
 });
+routers.post("/file",upload.single('file'),async(req:Request,res:Response)=>{
+  try{
+    const fileBody = req.file;
+    
+    console.log(fileBody);
+    
+    const file :IFileUpload = new File({
+      _id: new mongoose.Types.ObjectId(),
+      ...fileBody
+    });
+    console.log(file);
+    
+    const createdFile = await UploadFile(file);
+    res.status(201).send({
+      status: true,
+      message: "Ok",
+      data: createdFile,
+    });
+  }catch(err){
+    res.status(500).send({
+      status: false,
+      message: "File couldn't be uploaded",
+    });
+  }
+})
+// routers.post("/multiple",async(req:Request,res:Response)=>{
+//   try{
+//     const filesBody = req.files;
+//     console.log(filesBody);
+//     const files :IFileUpload[] = filesBody.map((file: any) => {
+//       return new File({
+//         _id: new mongoose.Types.ObjectId(),
+//       ...file
+//       });
+//     }
 
-// routers.post("/abc", async (req: Request, res: Response) => {
-//   try {
-//     const productBody = req.body;
-//     const product: IProductHead = new ProdctHead({
-//       _id: new mongoose.Types.ObjectId(),
-//       ...productBody,
-//     });
-//     const createdProduct = await createProduct1(product);
-//     res.status(200).send(createdProduct);
-//   } catch (err) {
-//     res.status(400).send({
+   
+
+//   }catch(err){
+//     res.status(500).send({
 //       status: false,
-//       message: "Product body is not valid",
+//       message: "File couldn't be uploaded",
 //     });
 //   }
-// });
-
-// routers.post("/def", async (req, res) => {
-//   try {
-//     const farmBody = req.body;
-//     const farm: IFarm = new Farm({
-//       _id: new mongoose.Types.ObjectId(),
-//       ...farmBody,
-//     });
-//     res.status(200).send({
-//       status: true,
-//       message: "Ok",
-//       data: farm,
-//     });
-//   } catch (err) {
-//     res.status(400).send({
-//       status: false,
-//       message: "Farm body is not valid",
-//     });
-//   }
-// });
-// routers.get("/:id",async(req:Request,res:Response)=>{
-//     const id = req.params.id;
 // })
+
+
+
+routers.post("/head", async (req: Request, res: Response) => {
+  try {
+    const productBody = req.body;
+    const product: IProductHead = new Head({
+      _id: new mongoose.Types.ObjectId(),
+      ...productBody,
+    });
+    const createdProduct = await createProductHead(product);
+    res.status(200).send({
+      status: true,
+      message: "Ok",
+      data: createdProduct,
+    });
+  } catch (err) {
+    res.status(400).send({
+      status: false,
+      message: "Product body is not valid",
+    });
+  }
+});
+
+routers.post("/farm", async (req, res) => {
+  try {
+    const farmBody = req.body;
+    const farm: IFarm = new Farm({
+      _id: new mongoose.Types.ObjectId(),
+      ...farmBody,
+    });
+    const createdFarm = await createfarm(farm);
+    res.status(200).send({
+      status: true,
+      message: "Ok",
+      data: createdFarm,
+    });
+  } catch (err) {
+    res.status(400).send({
+      status: false,
+      message: "Farm body is not valid",
+    });
+  }
+});
+routers.get("/farm/:id",async(req:Request,res:Response)=>{
+  try{
+    if(ObjectId.isValid(req.params.id)){
+      const farmId = req.params.id;
+      const farm = await getProductHeadById(farmId);
+      res.status(200).send({
+        status: true,
+        message: "Ok",
+        data: farm,
+      });
+    }else{
+      res.status(400).send({
+        message: "Id is not valid",
+      });
+    }
+  }catch(err){
+    res.status(400).send({
+      status: false,
+      message: `couldn't find data ${err}`,
+    });
+
+  }
+})
+
+

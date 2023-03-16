@@ -1,4 +1,6 @@
+import { NextFunction } from "express";
 import { model, Schema, Document, Types } from "mongoose";
+import bcrypt from "bcryptjs"
 
 export interface IProduct extends Document {
   pid: number;
@@ -47,21 +49,63 @@ const userSchema: Schema = new Schema<IUser>({
   username: {type:String,required:true,unique:true,lowercase:true},
   passcode: {type:String,required:true,},
 })
+//Applying pre Hooks on schema
+userSchema.pre("save",function(next){
+  const user = this;
+  if(user.isModified('passcode')){
+    bcrypt.genSalt(10,(err,salt)=>{
+      if(err)
+      return next(err);
+      bcrypt.hash(user.passcode,salt,(err,hash)=>{
+        if(err)
+        return next(err);
+        user.passcode = hash;
+        next();
+      })
+    })
+  }else{
+    next();
+  }
+});
+//Applying Post hooks on schema
+userSchema.post("save",(user)=>{
+  console.log(`user saved of Id : ${user._id}`);
 
+})
+  
 export const User = model<IUser>("User",userSchema);
+
+export interface IFileUpload extends Document{
+  filename: string;
+  path: string;
+}
+
+const fileUploadSchema: Schema = new Schema<IFileUpload>({
+  filename: {type:String},
+  path:     {type:String},
+});
+
+export const File = model<IFileUpload>("File",fileUploadSchema);
 
 
 export interface IProductHead extends Document {
   name: string;
   age: number;
   location: string;
+  farm?:Types.ObjectId;
 }
 const productHeadSchema: Schema = new Schema<IProductHead>({
   name: { type: String },
   age: { type: Number },
   location: { type: String },
+  farm:[
+    {
+      type:Schema.Types.ObjectId,
+      ref:"Farm"
+    }
+  ]
 });
-export const ProdctHead = model<IProductHead>("Head", productHeadSchema);
+export const Head = model<IProductHead>("Head", productHeadSchema);
 
 export interface IFarm extends Document {
   name: string;

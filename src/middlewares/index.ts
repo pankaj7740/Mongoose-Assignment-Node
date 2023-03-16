@@ -2,6 +2,7 @@ import Joi from "joi";
 import { Request, Response, NextFunction } from "express";
 import { IProduct,Product } from "../models";
 import Jwt  from "jsonwebtoken";
+import multer from "multer"
 
 
 const validateProductBody = (req:Request,res:Response,next:NextFunction)=>{
@@ -47,5 +48,16 @@ const verifyToken = (req:Request,res:Response,next:NextFunction)=>{
         }
     }
 }
+
+ const storage = multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,'images')
+    },
+    filename: function (req, file, cb) {
+        console.log(file);
+        cb(null, file.originalname); 
+      },
+});
+export const upload = multer({ storage:storage });
 
 export  {validateProductBody,validateProductId,verifyToken}

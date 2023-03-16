@@ -1,4 +1,4 @@
-import { Product, IProduct } from "../models/index";
+import { Product, IProduct, Farm,Head,IFarm,IProductHead } from "../models/index";
 
 export const createProduct = (productBody: IProduct) => {
   return new Promise((resolve, reject) => {
@@ -46,19 +46,34 @@ export const createUser = (userBody:any)=>{
    .catch(reject);
   });
 }
+export const UploadFile = (file:any)=>{
+  return new Promise((resolve, reject) => {
+    file.save()
+  .then(resolve)
+  .catch(reject);
+  });
+}
 
-// export const createProduct1 = (productBody: any)=>{
-//     return new Promise ((resolve, reject) => {
-//         productBody.save()
-//         .then(resolve)
-//         .catch(reject);
-//     });
-// }
-// export const getProductId = (productId:string)=>{
-//     return new Promise ((resolve, reject) => {
-//         Product.findById(productId)
-//        .then(resolve)
-//        .catch(reject);
-//     });
-// }
+export const createProductHead = (productBody: any)=>{
+    return new Promise ((resolve, reject) => {
+        productBody.save()
+        .then(resolve)
+        .catch(reject);
+    });
+}
+export const getProductHeadById = (farmId:string)=>{
+    return new Promise ((resolve, reject) => {
+       Farm.findById(farmId).populate('heads')
+       .then(resolve)
+       .catch(reject);
+    });
+}
+
+export const createfarm = (farmBody:any)=>{
+  return new Promise ((resolve, reject) => {
+    farmBody.save()
+  .then(resolve)
+  .catch(reject);
+  });
+}
 
