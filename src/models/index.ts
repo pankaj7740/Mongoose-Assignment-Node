@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
 import { model, Schema, Document, Types } from "mongoose";
-import bcrypt from "bcryptjs"
+import bcrypt, { compareSync } from "bcryptjs"
 
 export interface IProduct extends Document {
   pid: number;
@@ -67,6 +67,7 @@ userSchema.pre("save",function(next){
     next();
   }
 });
+
 //Applying Post hooks on schema
 userSchema.post("save",(user)=>{
   console.log(`user saved of Id : ${user._id}`);

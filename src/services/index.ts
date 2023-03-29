@@ -1,4 +1,4 @@
-import { Product, IProduct, Farm,Head,IFarm,IProductHead } from "../models/index";
+import { Product, IProduct, Farm,Head,IFarm,IProductHead,IUser,User } from "../models/index";
 
 export const createProduct = (productBody: IProduct) => {
   return new Promise((resolve, reject) => {
@@ -45,6 +45,14 @@ export const createUser = (userBody:any)=>{
    .then(resolve)
    .catch(reject);
   });
+}
+export const findUser = (username : string) =>{
+  return new Promise((resolve, reject) => {
+    User.findOne({username: username})
+    .then(resolve)
+    .catch(reject);
+  });
+
 }
 export const UploadFile = (file:any)=>{
   return new Promise((resolve, reject) => {

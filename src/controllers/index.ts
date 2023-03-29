@@ -1,7 +1,12 @@
 import express, { NextFunction, Request, Response } from "express";
+import expressSession from "express-session";
 import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import passport from "passport";
+import passportJwt from "passport-jwt";
+import * as passportLocal from "passport-local";
+const LocalStrategy = passportLocal.Strategy;
 import {
   IProduct,
   Product,
@@ -12,13 +17,14 @@ import {
   IProductHead,
   Head,
   IFileUpload,
-  File
+  File,
 } from "../models";
 import {
   validateProductBody,
   validateProductId,
   verifyToken,
-  upload
+  upload,
+  initiallizePassport
 } from "../middlewares";
 import {
   createProduct,
@@ -27,16 +33,59 @@ import {
   updateProductById,
   deleteProductById,
   createUser,
+  findUser,
   createProductHead,
   createfarm,
   getProductHeadById,
-  UploadFile
+  UploadFile,
 } from "../services";
 
 export const routers = express();
 
-routers.use(express.json());
+initiallizePassport(passport);
 
+routers.use(express.json());
+routers.use(
+  expressSession({
+    secret: String(process.env.SECRET_KEY),
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+routers.use(passport.initialize());
+routers.use(passport.session());
+routers.post("/register", async (req: Request, res: Response) => {
+  try {
+    const username: string = req.body.username;
+    const passcode: string = req.body.passcode;
+    const userNameExist = await findUser(username);
+    if (userNameExist) {
+      return res.status(400).send("User already exist");
+    }
+    const user: IUser = new User({
+      _id: new mongoose.Types.ObjectId(),
+      username: username,
+      passcode: passcode,
+    });
+    const newUser = await createUser(user);
+    res.status(201).send({
+      status: true,
+      message: "ok",
+      data: newUser,
+    });
+  } catch (error: any) {
+    res.status(400).send({
+      status: false,
+      message: "couldnt be registered",
+    });
+  }
+});
+
+routers.post('/login',passport.authenticate('local',{
+  failureMessage:"Failed to login"
+}),(req:Request,res:Response)=>{
+  res.send("Login successfully");
+})
 
 routers.post("/auth",async (req: Request, res: Response) => {
   try {
@@ -46,7 +95,7 @@ routers.post("/auth",async (req: Request, res: Response) => {
       ...userBody,
     });
     await createUser(user);
-    jwt.sign({ user }, String(process.env.SECRET_KEY), {expiresIn:'200s'}, (err, token) => {
+    jwt.sign({ user }, String(process.env.SECRET_KEY), {expiresIn:'300s'}, (err, token) => {
       if (err) throw err;
       res.status(201).send(token);
     });
@@ -55,33 +104,28 @@ routers.post("/auth",async (req: Request, res: Response) => {
   }
 });
 
-routers.post(
-  "/",
-  verifyToken,
-  validateProductBody,
-  async (req: Request, res: Response) => {
-    try {
-      const productBody = req.body;
-      const product: IProduct = new Product({
-        _id: new mongoose.Types.ObjectId(),
-        ...productBody,
-      });
-      const createdProduct = await createProduct(product);
-      res.status(201).send({
-        status: true,
-        message: "Ok",
-        data: createdProduct,
-      });
-    } catch (error: any) {
-      res.status(500).send({
-        status: false,
-        message: "Product couldn't Be created",
-      });
-    }
+routers.post("/",validateProductBody,verifyToken, async (req: Request, res: Response) => {
+  try {
+    const productBody = req.body;
+    const product: IProduct = new Product({
+      _id: new mongoose.Types.ObjectId(),
+      ...productBody,
+    });
+    const createdProduct = await createProduct(product);
+    res.status(201).send({
+      status: true,
+      message: "Ok",
+      data: createdProduct,
+    });
+  } catch (error: any) {
+    res.status(500).send({
+      status: false,
+      message: "Product couldn't Be created",
+    });
   }
-);
+});
 
-routers.get("/", verifyToken, async (req: Request, res: Response) => {
+routers.get("/",verifyToken, async (req: Request, res: Response) => {
   try {
     const products: any = await getAllProducts();
     res.status(200).send({
@@ -120,8 +164,9 @@ routers.get("/:id",verifyToken, async (req: Request, res: Response) => {
 });
 
 routers.put(
-  "/:id",verifyToken,
+  "/:id",
   validateProductBody,
+  verifyToken,
   async (req: Request, res: Response) => {
     try {
       if (ObjectId.isValid(req.params.id)) {
@@ -168,34 +213,38 @@ routers.delete("/:id",verifyToken, async (req: Request, res: Response) => {
     });
   }
 });
-routers.post("/file",upload.single('file'),async(req:Request,res:Response)=>{
-  try{
-    const fileBody = req.file;
-    
-    console.log(fileBody);
-    
-    const file :IFileUpload = new File({
-      _id: new mongoose.Types.ObjectId(),
-      ...fileBody
-    });
-    console.log(file);
-    
-    const createdFile = await UploadFile(file);
-    res.status(201).send({
-      status: true,
-      message: "Ok",
-      data: createdFile,
-    });
-  }catch(err){
-    res.status(500).send({
-      status: false,
-      message: "File couldn't be uploaded",
-    });
+routers.post(
+  "/file",
+  upload.single("file"),
+  async (req: Request, res: Response) => {
+    try {
+      const fileBody = req.file;
+
+      console.log(fileBody);
+
+      const file: IFileUpload = new File({
+        _id: new mongoose.Types.ObjectId(),
+        ...fileBody,
+      });
+      console.log(file);
+
+      const createdFile = await UploadFile(file);
+      res.status(201).send({
+        status: true,
+        message: "Ok",
+        data: createdFile,
+      });
+    } catch (err) {
+      res.status(500).send({
+        status: false,
+        message: "File couldn't be uploaded",
+      });
+    }
   }
-})
+);
 // routers.post("/multiple",async(req:Request,res:Response)=>{
 //   try{
-//     const filesBody = req.files;
+//     const {filesBody} = req.files;
 //     console.log(filesBody);
 //     const files :IFileUpload[] = filesBody.map((file: any) => {
 //       return new File({
@@ -203,9 +252,6 @@ routers.post("/file",upload.single('file'),async(req:Request,res:Response)=>{
 //       ...file
 //       });
 //     }
-
-   
-
 //   }catch(err){
 //     res.status(500).send({
 //       status: false,
@@ -213,8 +259,6 @@ routers.post("/file",upload.single('file'),async(req:Request,res:Response)=>{
 //     });
 //   }
 // })
-
-
 
 routers.post("/head", async (req: Request, res: Response) => {
   try {
@@ -257,9 +301,9 @@ routers.post("/farm", async (req, res) => {
     });
   }
 });
-routers.get("/farm/:id",async(req:Request,res:Response)=>{
-  try{
-    if(ObjectId.isValid(req.params.id)){
+routers.get("/farm/:id", async (req: Request, res: Response) => {
+  try {
+    if (ObjectId.isValid(req.params.id)) {
       const farmId = req.params.id;
       const farm = await getProductHeadById(farmId);
       res.status(200).send({
@@ -267,18 +311,15 @@ routers.get("/farm/:id",async(req:Request,res:Response)=>{
         message: "Ok",
         data: farm,
       });
-    }else{
+    } else {
       res.status(400).send({
         message: "Id is not valid",
       });
     }
-  }catch(err){
+  } catch (err) {
     res.status(400).send({
       status: false,
       message: `couldn't find data ${err}`,
     });
-
   }
-})
-
-
+});

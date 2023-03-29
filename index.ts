@@ -23,13 +23,13 @@ databaseLoader()
     process.exit(1);
   });
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: any;
-    }
-  }
-}
+// declare global {
+//   namespace Express {
+//     interface Request {
+//       user?: any;
+//     }
+//   }
+// }
 
 
 
