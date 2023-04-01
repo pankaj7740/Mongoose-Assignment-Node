@@ -1,3 +1,4 @@
+import { string } from "joi";
 import { Document, Types } from "mongoose";
 
 export interface IProduct extends Document {
@@ -33,3 +34,18 @@ export interface IProduct extends Document {
     filename: string;
     path: string;
   }
+  export enum ROLE{
+    ENUM_VALUE1 = "ADMIN",
+    ENUM_VALUE2 = "USER"
+   }
+  export interface IProfile extends Document{
+    name:string;
+    email:string;
+    password:string;
+    role :ROLE
+  }
+  export interface ILogin{
+    email:string;
+    _id:string
+  }
+

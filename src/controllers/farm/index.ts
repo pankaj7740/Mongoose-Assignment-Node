@@ -8,7 +8,7 @@ import { IFarm } from "../../lib";
 
 export const farmRouters = express();
 
-farmRouters.post("/farm", async (req, res) => {
+farmRouters.post("/", async (req, res) => {
     try {
       const farmBody = req.body;
       const farm: IFarm = new Farm({
@@ -16,7 +16,7 @@ farmRouters.post("/farm", async (req, res) => {
         ...farmBody,
       });
       const createdFarm = await createfarm(farm);
-      res.status(200).send({
+      res.status(201).send({
         status: true,
         message: "Ok",
         data: createdFarm,
@@ -28,7 +28,7 @@ farmRouters.post("/farm", async (req, res) => {
       });
     }
   });
-  farmRouters.get("/farm/:id", async (req: Request, res: Response) => {
+  farmRouters.get("/:id", async (req: Request, res: Response) => {
     try {
       if (ObjectId.isValid(req.params.id)) {
         const farmId = req.params.id;

@@ -26,19 +26,13 @@ const validateProductId = (req:Request,res:Response,next:NextFunction)=>{
    }
    next();
 }
-
 const verifyToken = (req:Request,res:Response,next:NextFunction)=>{
     const token = req.headers['authorization'];
     if(!token){
         return res.status(401).send("Token is not valid");
     }else{
         try{
-            const decoded = Jwt.verify(token,String(process.env.SECRET_KEY));
-            // console.log(decoded);
-        //     // req.user = decoded;
-        //    const tse= res.locals.Jwt = decoded;
-        //    tse;
-        //    console.log(tse);
+            Jwt.verify(token,String(process.env.SECRET_KEY));
             next();
         }catch(err){
             res.status(401).send("Unauthorised access");

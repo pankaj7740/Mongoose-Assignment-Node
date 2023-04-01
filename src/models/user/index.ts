@@ -7,7 +7,7 @@ const userSchema: Schema = new Schema<IUser>({
     passcode: {type:String,required:true,},
   })
   //Applying pre Hooks on schema
-  userSchema.pre("save",function(next){
+  userSchema.pre<IUser>("save",function(next){
     const user = this;
     if(user.isModified('passcode')){
       genSalt(10,(err,salt)=>{

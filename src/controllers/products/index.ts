@@ -28,14 +28,17 @@ productRouter.post("/auth", async (req: Request, res: Response) => {
     jwt.sign(
       { user },
       String(process.env.SECRET_KEY),
-      { expiresIn: "300s" },
+      { expiresIn: "2h" },
       (err, token) => {
         if (err) throw err;
+        console.log(token);
         res.status(201).send(token);
       }
     );
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send({
+      err:"Server side problem"
+    });
   }
 });
 
