@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import express, { Request, Response } from "express";
 import { Product, User } from "../../models";
-import { IProduct, IUser } from "../../lib";
+import { IProduct, IUser, makeResponse } from "../../lib";
 import {
   createProduct,
   createUser,
@@ -31,14 +31,11 @@ productRouter.post("/auth", async (req: Request, res: Response) => {
       { expiresIn: "2h" },
       (err, token) => {
         if (err) throw err;
-        console.log(token);
-        res.status(201).send(token);
+       makeResponse(res,201,true,"Ok",token);
       }
     );
-  } catch (err) {
-    res.status(500).send({
-      err:"Server side problem"
-    });
+  } catch (err:any) {
+    makeResponse(res,400,false,err.message,undefined)
   }
 });
 
@@ -54,16 +51,9 @@ productRouter.post(
         ...productBody,
       });
       const createdProduct = await createProduct(product);
-      res.status(201).send({
-        status: true,
-        message: "Ok",
-        data: createdProduct,
-      });
+      makeResponse(res,201,true,"Ok",createdProduct);
     } catch (error: any) {
-      res.status(500).send({
-        status: false,
-        message: "Product couldn't Be created",
-      });
+      makeResponse(res,400,false,error.message,undefined);
     }
   }
 );
@@ -71,15 +61,9 @@ productRouter.post(
 productRouter.get("/", verifyToken, async (req: Request, res: Response) => {
   try {
     const products: any = await getAllProducts();
-    res.status(200).send({
-      status: true,
-      message: "Ok",
-      data: products,
-    });
+    makeResponse(res,200,true,"Ok",products);
   } catch (error: any) {
-    res.status(400).send({
-      status: false,
-    });
+    makeResponse(res,400,false,error.message,undefined)
   }
 });
 
@@ -88,21 +72,12 @@ productRouter.get("/:id", verifyToken, async (req: Request, res: Response) => {
     if (ObjectId.isValid(req.params.id)) {
       const productId = req.params.id;
       const product = await getProductById(productId);
-      res.status(200).send({
-        status: true,
-        message: "Ok",
-        data: product,
-      });
+      makeResponse(res,200,true,"Ok",product);
     } else {
-      res.status(400).send({
-        message: "Id is not valid",
-      });
+      makeResponse(res,400,false,"Id is not valid",undefined)
     }
   } catch (error: any) {
-    res.status(400).send({
-      status: false,
-      message: "couldn't find product using Id",
-    });
+    makeResponse(res,400,false,error.message,undefined)
   }
 });
 
@@ -116,21 +91,12 @@ productRouter.put(
         const productId = req.params.id;
         const productBody = req.body;
         const product = await updateProductById(productId, productBody);
-        res.status(200).send({
-          status: true,
-          message: "Ok",
-          data: product,
-        });
+        makeResponse(res,200,true,"Ok",product)
       } else {
-        res.status(400).send({
-          message: "Id is not valid",
-        });
+        makeResponse(res,400,false,"Id is not valid",undefined)
       }
     } catch (error: any) {
-      res.status(400).send({
-        status: false,
-        message: "Couldn't be updated",
-      });
+      makeResponse(res,400,false,error.message,undefined)
     }
   }
 );
@@ -142,21 +108,12 @@ productRouter.delete(
       if (ObjectId.isValid(req.params.id)) {
         const productId = req.params.id;
         const deletedProduct = await deleteProductById(productId);
-        res.status(200).send({
-          status: true,
-          message: "Ok",
-          data: deletedProduct,
-        });
+        makeResponse(res,200,true,"Product deleted successfully",deletedProduct);
       } else {
-        res.status(400).send({
-          message: "Id is not valid",
-        });
+        makeResponse(res,400,false,"Id is not valid",undefined);
       }
     } catch (error: any) {
-      res.status(400).send({
-        status: false,
-        message: "Product removed Faild",
-      });
+      makeResponse(res,400,false,error.message,undefined);
     }
   }
 );

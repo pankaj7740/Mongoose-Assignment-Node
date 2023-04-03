@@ -3,7 +3,7 @@ import express,{Request,Response} from "express";
 import { upload } from "../../middlewares";
 import { File } from "../../models";
 import { UploadFile } from "../../services";
-import { IFileUpload } from "../../lib";
+import { IFileUpload, makeResponse } from "../../lib";
 
 
 export const fileRouter = express();
@@ -14,25 +14,14 @@ fileRouter.post(
     async (req: Request, res: Response) => {
       try {
         const fileBody = req.file;
-  
-        console.log(fileBody);
-  
         const file: IFileUpload = new File({
           _id: new mongoose.Types.ObjectId(),
           ...fileBody,
         });
-        console.log(file);
         const createdFile = await UploadFile(file);
-        res.status(201).send({
-          status: true,
-          message: "Ok",
-          data: createdFile,
-        });
-      } catch (err) {
-        res.status(500).send({
-          status: false,
-          message: "File couldn't be uploaded",
-        });
+        makeResponse(res,200,true,"Ok",createdFile);
+      } catch (err:any) {
+        makeResponse(res,200,false,err.message,undefined);
       }
     }
 );

@@ -3,7 +3,7 @@ import express,{Request,Response} from "express";
 import mongoose from "mongoose";
 import { Farm } from "../../models";
 import { createfarm, getProductHeadById } from "../../services";
-import { IFarm } from "../../lib";
+import { IFarm, makeResponse } from "../../lib";
 
 
 export const farmRouters = express();
@@ -16,16 +16,9 @@ farmRouters.post("/", async (req, res) => {
         ...farmBody,
       });
       const createdFarm = await createfarm(farm);
-      res.status(201).send({
-        status: true,
-        message: "Ok",
-        data: createdFarm,
-      });
-    } catch (err) {
-      res.status(400).send({
-        status: false,
-        message: "Farm body is not valid",
-      });
+      makeResponse(res,201,true,"Ok",createdFarm);
+    } catch (err:any) {
+      makeResponse(res,200,false,err.message,undefined);
     }
   });
   farmRouters.get("/:id", async (req: Request, res: Response) => {
@@ -33,21 +26,12 @@ farmRouters.post("/", async (req, res) => {
       if (ObjectId.isValid(req.params.id)) {
         const farmId = req.params.id;
         const farm = await getProductHeadById(farmId);
-        res.status(200).send({
-          status: true,
-          message: "Ok",
-          data: farm,
-        });
+        makeResponse(res,200,true,"Ok",farm);
       } else {
-        res.status(400).send({
-          message: "Id is not valid",
-        });
+        makeResponse(res,400,false,"Id is not valid",undefined);
       }
-    } catch (err) {
-      res.status(400).send({
-        status: false,
-        message: `couldn't find data ${err}`,
-      });
+    } catch (err:any) {
+      makeResponse(res,400,false,err.message,undefined);
     }
   });
   

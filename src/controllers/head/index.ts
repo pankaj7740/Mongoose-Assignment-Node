@@ -1,6 +1,6 @@
 import express,{Request,Response} from "express";
 import mongoose from "mongoose";
-import { IProductHead } from "../../lib";
+import { IProductHead, makeResponse } from "../../lib";
 import {  Head } from "../../models";
 import { createProductHead } from "../../services";
 
@@ -14,15 +14,8 @@ productHeadRouter.post("/head", async (req: Request, res: Response) => {
         ...productBody,
       });
       const createdProduct = await createProductHead(product);
-      res.status(200).send({
-        status: true,
-        message: "Ok",
-        data: createdProduct,
-      });
-    } catch (err) {
-      res.status(400).send({
-        status: false,
-        message: "Product body is not valid",
-      });
+      makeResponse(res,200,true,"Ok",createdProduct);
+    } catch (err:any) {
+      makeResponse(res,200,true,err.message,undefined);
     }
   });

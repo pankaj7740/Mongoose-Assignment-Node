@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import express,{Request,Response} from "express";
 import {  User } from "../../models";
-import {IUser} from "../../lib";
+import {IUser, makeResponse} from "../../lib";
 import { findUser, createUser } from "../../services";
 import passport from "passport";
 import { initiallizePassport } from "../../middlewares";
@@ -38,21 +38,14 @@ userRouter.post("/register", async (req: Request, res: Response) => {
         passcode: passcode,
       });
       const newUser = await createUser(user);
-      res.status(201).send({
-        status: true,
-        message: "ok",
-        data: newUser,
-      });
+      makeResponse(res,201,true,"Ok",newUser);
     } catch (error: any) {
-      res.status(400).send({
-        status: false,
-        message: "couldnt be registered",
-      });
+      makeResponse(res,400,false,error.message,undefined);
     }
   });
 
   userRouter.post('/login',passport.authenticate('local',{
     failureMessage:"Failed to login"
   }),(req:Request,res:Response)=>{
-    res.send("Login successfully");
+    makeResponse(res,200,true,"Ok",undefined);
   })

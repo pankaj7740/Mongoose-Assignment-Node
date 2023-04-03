@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { Profile } from "../../models";
-import { IProfile } from "../../lib";
+import { IProfile, makeResponse } from "../../lib";
 import {
     findProfile,
     findProfileWithPagination,
@@ -38,33 +38,24 @@ profileRouter.post(
                 ...profileBody,
             });
             const registeredProfile = await registerProfile(profile);
-            res.status(201).send({
-                status: true,
-                message: "ok",
-                data: registeredProfile,
-            });
-        } catch (error) {
-            res.status(400).send({
-                status: false,
-                error: "couldn't register profile",
-            });
+            makeResponse(res,201,true,"Ok",registeredProfile)
+        } catch (error:any){
+            makeResponse(res,400,false,error.message,undefined)
         }
     }
 );
 profileRouter.post("/login", async (req: Request, res: Response) => {
     try {
-        const emailBody = req.body.email;
-        const passwordBody = req.body.password;
-
-        const profile: any = await findProfile(emailBody);
-        if (profile && compareHashPassword(passwordBody, profile.password)) {
+        const {email,password} = req.body;
+        const profile: any = await findProfile(email);
+        if (profile && compareHashPassword(password, profile.password)) {
             jwt.sign(
                 { email: profile.email, _id: profile._id },
                 String(process.env.SECRET_KEY),
                 { expiresIn: "2h" },
                 (err, token) => {
                     if (err) throw err;
-                    res.status(200).send(token);
+                    makeResponse(res,200,true,"Ok",token);
                 }
             );
         } else {
@@ -72,11 +63,8 @@ profileRouter.post("/login", async (req: Request, res: Response) => {
                 message: "Invalid credantial",
             });
         }
-    } catch (error: unknown) {
-        res.status(400).send({
-            status: false,
-            error: "Login Failed!",
-        });
+    } catch (error: any) {
+        makeResponse(res,400,false,error.message,undefined);
     }
 });
 
@@ -87,6 +75,7 @@ profileRouter.get(
         try {
             let page = Number(req.query.page);
             let size = Number(req.query.size);
+            // let {page, size} = Number(req.query);
             if (!page) {
                 page = 1;
             }
@@ -95,20 +84,14 @@ profileRouter.get(
             }
             const skip = (page - 1) * size;
             const profileData = await findProfileWithPagination(size, skip);
-            res.status(200).send({
-                status: true,
-                message: "Ok",
-                data: {
-                    page: page,
-                    size: size,
-                    profileData: profileData,
-                },
-            });
+            const data = {
+                page: page,
+                size: size,
+                profileData: profileData
+            }
+             makeResponse(res,200,true,"Ok",data);
         } catch (error: any) {
-            res.status(404).send({
-                status: false,
-                error: error.message,
-            });
+            makeResponse(res,400,false,error.message,undefined)
         }
     }
 );
